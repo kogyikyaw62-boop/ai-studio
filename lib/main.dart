@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _generateImage(String apiKey, String prompt) async {
-    setState(() => _loadingMessage = "ဓါတ်ပုံ ဖန်တီးနေပါသည်...");
+    setState(() => _loadingMessage = "Generating image...");
 
     final response = await http.post(
       Uri.parse("https://fal.run/fal-ai/flux/schnell"),
@@ -103,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _generateVideo(String apiKey, String prompt) async {
-    setState(() => _loadingMessage = "Queue စောင့်ဆိုင်းနေပါသည်...");
+    setState(() => _loadingMessage = "Queuing video generation...");
 
     final queueResponse = await http.post(
       Uri.parse("https://queue.fal.run/fal-ai/ltx-video"),
@@ -143,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         if (status == "COMPLETED") {
           completed = true;
-          setState(() => _loadingMessage = "ဗီဒီယို ရယူနေပါသည်...");
+          setState(() => _loadingMessage = "Fetching video...");
 
           final resultCheck = await http.get(
             Uri.parse(responseUrl),
@@ -165,13 +165,13 @@ class _HomeScreenState extends State<HomeScreen> {
               });
           }
         } else {
-          setState(() => _loadingMessage = "ဗီဒီယို ဖန်တီးနေဆဲဖြစ်ပါသည် ($status)...");
+          setState(() => _loadingMessage = "Generating video ($status)...");
         }
       }
     }
 
     if (!completed) {
-      throw Exception("Video generation အချိန်ကြာမြင့်နေပါသည်။ နောက်မှ ထပ်စမ်းပါ။");
+      throw Exception("Video generation timed out.");
     }
   }
 
@@ -181,14 +181,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (apiKey.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Fal.ai API Key အရင်ထည့်ပေးပါ")),
+        const SnackBar(content: Text("Please configure Fal.ai API Key in settings")),
       );
       return;
     }
 
     if (prompt.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Prompt စာသား ရိုက်ထည့်ပေးပါ")),
+        const SnackBar(content: Text("Please enter a prompt")),
       );
       return;
     }
@@ -232,11 +232,11 @@ class _HomeScreenState extends State<HomeScreen> {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Gallery ထဲသို့ သိမ်းဆည်းပြီးပါပြီ!")),
+        const SnackBar(content: Text("Saved to gallery successfully!")),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("သိမ်းဆည်း၍ မရပါ: $e")),
+        SnackBar(content: Text("Save failed: $e")),
       );
     } finally {
       setState(() => _isSaving = false);
@@ -265,11 +265,11 @@ class _HomeScreenState extends State<HomeScreen> {
               showDialog(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  title: const Text("Fal.ai API Key ထည့်ရန်"),
+                  title: const Text("Fal.ai API Key"),
                   content: TextField(
                     controller: _apiKeyController,
                     decoration: const InputDecoration(
-                      hintText: "Key ထည့်ပါ (fal_key_...)",
+                      hintText: "Enter Key (fal_key_...)",
                     ),
                   ),
                   actions: [
@@ -327,8 +327,8 @@ class _HomeScreenState extends State<HomeScreen> {
               maxLines: 4,
               decoration: InputDecoration(
                 hintText: _isVideo
-                    ? "ဖန်တီးလိုသော Video prompt ကို ရိုက်ထည့်ပါ..."
-                    : "ဖန်တီးလိုသော Image prompt ကို ရိုက်ထည့်ပါ...",
+                    ? "Enter video prompt..."
+                    : "Enter image prompt...",
                 filled: true,
                 fillColor: const Color(0xFF1E293B),
                 border: OutlineInputBorder(
@@ -416,7 +416,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ElevatedButton.icon(
                 onPressed: _isSaving ? null : _saveToGallery,
                 icon: const Icon(Icons.download),
-                label: Text(_isSaving ? "သိမ်းဆည်းနေပါသည်..." : "Save to Gallery"),
+                label: Text(_isSaving ? "Saving..." : "Save to Gallery"),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
                   padding: const EdgeInsets.symmetric(vertical: 12),
