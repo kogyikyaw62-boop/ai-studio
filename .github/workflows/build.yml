@@ -22,23 +22,32 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Setup Full Project
+      - name: Build Android App Cleanly
         run: |
+          # Backup user's main.dart
+          cp lib/main.dart /tmp/main.dart.bak
+
+          # Re-create flutter skeleton properly
           rm -rf test
           flutter create . --project-name ai_studio_mobile --org com.aistudio.app
+
+          # Restore our custom code
+          cp /tmp/main.dart.bak lib/main.dart
+
+          # Add required dependencies
           flutter pub add http video_player cached_network_image dio gal path_provider shared_preferences
-          
-          # Fix minSdk for Android
+
+          # Set minSdk to 23 for Gal package
           sed -i 's/minSdkVersion .*/minSdkVersion 23/' android/app/build.gradle 2>/dev/null || true
           sed -i 's/flutter.minSdkVersion/23/' android/app/build.gradle 2>/dev/null || true
-          
-          # Add Internet & Storage Permissions
+
+          # Permissions
           sed -i '/<manifest/a <uses-permission android:name="android.permission.INTERNET"/>\n<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>' android/app/src/main/AndroidManifest.xml
 
-      - name: Build APK
+      - name: Compile Release APK
         run: flutter build apk --release
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release
