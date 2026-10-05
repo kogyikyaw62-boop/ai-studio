@@ -22,12 +22,18 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Create Flutter skeleton
-        run: flutter create . --project-name ai_studio_mobile
-
-      - name: Add Internet Permission
+      - name: Setup Full Project
         run: |
-          sed -i '/<manifest/a <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml
+          rm -rf test
+          flutter create . --project-name ai_studio_mobile --org com.aistudio.app
+          flutter pub add http video_player cached_network_image dio gal path_provider shared_preferences
+          
+          # Fix minSdk for Android
+          sed -i 's/minSdkVersion .*/minSdkVersion 23/' android/app/build.gradle 2>/dev/null || true
+          sed -i 's/flutter.minSdkVersion/23/' android/app/build.gradle 2>/dev/null || true
+          
+          # Add Internet & Storage Permissions
+          sed -i '/<manifest/a <uses-permission android:name="android.permission.INTERNET"/>\n<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>' android/app/src/main/AndroidManifest.xml
 
       - name: Build APK
         run: flutter build apk --release
